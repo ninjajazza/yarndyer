@@ -434,7 +434,6 @@ void runMenuCancelState() {
 
   // otherwise update the temperature
   if (tempCheckTimer.onRestart()) {
-    currentTemp = getTemp();
   }
 
   // check temperature against set temperature and set relay
@@ -619,23 +618,21 @@ void setupMenu(float displayTemp, int displayTime, int cursorRow, int cursorCol,
   lcd.setCursor(0, 0);
   lcd.write(1);
 
-  //temp
+  // display temp
+  lcd.setCursor(5, 0);
+  lcd.write(2); // degrees symbol
   lcd.setCursor(2, 0);
   lcd.print(String(displayTemp, 0));
-
-  //spacing
-  lcd.setCursor(4, 0);
-  lcd.write(2); // degrees symbol
-  lcd.setCursor(5, 0);
+  lcd.setCursor(6, 0);
   lcd.print("C");
 
   // display clock icon
   lcd.setCursor(10, 0);
   lcd.write(3); // clock symbol
-
   // display time
   lcd.setCursor(12, 0);
   lcd.print(displayTime);
+  // display time formatting
   lcd.setCursor(15, 0);
   lcd.print("m");
 
@@ -670,31 +667,38 @@ void runMenu(float displayTemp, int progressTime, int runningTime) {
   lcd.setCursor(0, 0);
   lcd.write(1);
 
-  //temp
-  lcd.setCursor(1, 0);
-  lcd.print(String(displayTemp, 0));
-
-  //spacing
-  lcd.setCursor(3, 0);
-  lcd.write(2); // degrees symbol
+  // temp formatting
   lcd.setCursor(4, 0);
+  lcd.write(2); // degrees symbol
+  lcd.setCursor(5, 0);
   lcd.print("C");
 
   // display clock icon
   lcd.setCursor(7, 0);
   lcd.write(3); // clock symbol
 
-  // display current time
+  // display progress time
   lcd.setCursor(8, 0);
   lcd.print(progressTime);
+  
+  // display time formatting elements
   lcd.setCursor(11, 0);
   lcd.print("/");
-
+  
   // display set time
   lcd.setCursor(12, 0);
   lcd.print(runningTime);
   lcd.setCursor(15, 0);
   lcd.print("m");
+
+  // temp
+  lcd.setCursor(3, 0);
+  lcd.print(String(displayTemp, 0));
+
+
+
+
+
 }
 
 // ************************************************
