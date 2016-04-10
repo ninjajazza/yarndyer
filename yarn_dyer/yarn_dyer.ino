@@ -95,9 +95,9 @@ void setup() {
   blinkTimer.setHertz(2); // frequency of blinking timer
   tempCheckTimer.setHertz(1); // frequency of temperature checks
   //heatingTimer;
-  
+
   blinkOn = false;
-  
+
   // set default run values
   setTimeMins = defaultSetTimeMins; // in mins
   setTime = setTimeMins * 60 * 1000; // in millis
@@ -106,17 +106,17 @@ void setup() {
   pinMode(relayPin, OUTPUT);
   pinMode(encoderPushPin, INPUT);
   Serial.println("Start");
-  
+
   // start the startup timer
   startupTimer.restart();
-  
+
 }
 
 void loop() {
   // check blink status
   if (blinkTimer.onRestart()) {
     blinkOn = ! blinkOn;
-    }
+  }
 
   // read rotary encoder input
   long newPosition = myEnc.read() / 4;
@@ -315,7 +315,7 @@ void setupMenuRunState() {
     machineState = 8;
     Serial.println("Moving to " + String(machineState));
     lcd.clear();
-    
+
     setTime = setTimeMins * 60UL * 1000UL; // in millis
     heatingTimer.setTimeout(setTime); // set the heating timer
     heatingTimer.restart(); // begin the timer
@@ -396,14 +396,14 @@ void setupMenuChangeTimeState() {
   // scroll forward, increase setTime
   if (encoderUp) {
     setTimeMins++;
-    setTimeMins = constrain(setTimeMins, 0, 240);
+    setTimeMins = constrain(setTimeMins, 1, 240);
     Serial.println("Time Up");
   }
 
   // scroll back, decrease setTime
   if (encoderDown) {
     setTimeMins--;
-    setTimeMins = constrain(setTimeMins, 0, 240);
+    setTimeMins = constrain(setTimeMins, 1, 240);
     Serial.println("Time Down");
   }
 
@@ -423,27 +423,27 @@ void setupMenuChangeTimeState() {
 // Run - Select Cancel (State 8)
 // ************************************************
 void runMenuCancelState() {
-  
+
   // check the time
   currentTime = millis();
   Serial.println("Current Time: " + String(currentTime));
-  
+
   elapsedHeatingTime = heatingTimer.getValue();
-  
+
   Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
 
   // otherwise update the temperature
   if (tempCheckTimer.onRestart()) {
     currentTemp = getTemp();
-    }
-  
+  }
+
   // check temperature against set temperature and set relay
   if (currentTemp < setTemp ) {
     digitalWrite(relayPin, HIGH);
   } else {
     digitalWrite(relayPin, LOW);
   }
-  
+
   displayHeatingTime = elapsedHeatingTime / 60000;
   Serial.println("Display Heating Time: " + String(displayHeatingTime));
 
@@ -457,34 +457,34 @@ void runMenuCancelState() {
   // cursor
   lcd.setCursor(9, 1);
   if (blinkOn) {
-      lcd.print(">");
-    } else {
-      lcd.print(" ");
-    }
+    lcd.print(">");
+  } else {
+    lcd.print(" ");
+  }
 
   // if user presses enter, move to Cancel (10)
   if (button.onPressed()) {
     machineState = 10;
     Serial.println("Moving to " + machineState);
     lcd.clear();
-    
+
     // stop timer
     heatingTimer.stop();
-    
+
     // turn off relay
     digitalWrite(relayPin, LOW);
   }
 
-   // if elapsedTime has reached setTime, move to Complete (11)
+  // if elapsedTime has reached setTime, move to Complete (11)
   if (heatingTimer.isExpired()) {
     machineState = 11;
     Serial.println("Moving to " + machineState);
     lcd.clear();
-    
+
     // turn off relay
     digitalWrite(relayPin, LOW);
-  } 
-  
+  }
+
 }
 
 // ************************************************
@@ -496,19 +496,19 @@ void runMenuCancelState() {
 // Cancel (State 10)
 // ************************************************
 void cancelState() {
- // check the time
+  // check the time
   currentTime = millis();
   Serial.println("Current Time: " + String(currentTime));
-  
+
   elapsedHeatingTime = heatingTimer.getValue();
-  
+
   Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
 
   // otherwise update the temperature
   if (tempCheckTimer.onRestart()) {
     currentTemp = getTemp();
-    }
-  
+  }
+
   runMenu(currentTemp, displayHeatingTime, setTimeMins);
 
   // cancelled
@@ -522,10 +522,10 @@ void cancelState() {
   // cursor
   lcd.setCursor(10, 1);
   if (blinkOn) {
-      lcd.print(">");
-    } else {
-      lcd.print(" ");
-    }
+    lcd.print(">");
+  } else {
+    lcd.print(" ");
+  }
 
   // if user presses enter, move to Reset (12)
   if (button.onPressed()) {
@@ -539,26 +539,19 @@ void cancelState() {
 // Complete (State 11)
 // ************************************************
 void completeState() {
- // check the time
+  // check the time
   currentTime = millis();
   Serial.println("Current Time: " + String(currentTime));
-  
+
   elapsedHeatingTime = heatingTimer.getValue();
-  
+
   Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
 
   // otherwise update the temperature
   if (tempCheckTimer.onRestart()) {
     currentTemp = getTemp();
-    }
-  
-  // check temperature against set temperature and set relay
-  if (currentTemp < setTemp ) {
-    digitalWrite(relayPin, HIGH);
-  } else {
-    digitalWrite(relayPin, LOW);
   }
-  
+
   runMenu(currentTemp, displayHeatingTime, setTimeMins);
 
   // complete
@@ -572,10 +565,10 @@ void completeState() {
   // cursor
   lcd.setCursor(10, 1);
   if (blinkOn) {
-      lcd.print(">");
-    } else {
-      lcd.print(" ");
-    }
+    lcd.print(">");
+  } else {
+    lcd.print(" ");
+  }
 
   // if user presses enter, move to Reset (12)
   if (button.onPressed()) {
@@ -590,7 +583,6 @@ void completeState() {
 // ************************************************
 void resetState() {
 
-  
   // set default run values
   setTimeMins = defaultSetTimeMins; // in mins
   setTime = setTimeMins * 60UL * 1000UL; // in millis
