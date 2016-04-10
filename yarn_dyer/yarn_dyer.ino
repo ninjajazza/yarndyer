@@ -1,6 +1,6 @@
 
 
-/*  Yarn Dyer 0.6
+/*  Yarn Dyer 0.7
 
     States
     0: Start
@@ -37,9 +37,9 @@ RBD::Timer tempCheckTimer;
 RBD::Timer heatingTimer;
 
 // set up variables
-int machineState, lastDebounceTime;
+int machineState;
 long oldPosition  = -999;
-unsigned long setTime, setTimeMins, currentTime, heatingStartTime, elapsedHeatingTime, displayHeatingTime, startupTimeStart, elapsedStartupTime, blinkTimeStart, blinkTime;
+unsigned long setTime, setTimeMins, currentTime, pausedTime, elapsedHeatingTime, displayHeatingTime, blinkTime;
 float setTemp, currentTemp;
 boolean blinkOn, encoderUp, encoderDown, buttonState;
 
@@ -51,7 +51,7 @@ const int startupTime = 3000; // in millis
 const int defaultSetTimeMins = 1; // in min
 const int defaultSetTemp = 22; // in C
 
-const String version = "v0.6";
+const String version = "v0.7";
 
 // create encoder
 Encoder myEnc(2, 3);
@@ -427,17 +427,17 @@ void runMenuPauseState() {
   
   Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
 
-  
-  // turn off heater, break
-  
   // otherwise update the temperature
   if (tempCheckTimer.onRestart()) {
     currentTemp = getTemp();
     }
   
-  // check temperature against set temperature
-  
-  // if needed update relay
+  // check temperature against set temperature and set relay
+  if (currentTemp < setTemp ) {
+    digitalWrite(relayPin, HIGH);
+  } else {
+    digitalWrite(relayPin, LOW);
+  }
   
   displayHeatingTime = elapsedHeatingTime / 60000;
   Serial.println("Display Heating Time: " + String(displayHeatingTime));
@@ -469,6 +469,9 @@ void runMenuPauseState() {
     Serial.println("Moving to " + String(machineState));
     lcd.clear();
     // turn off heater, store current time, break
+    digitalWrite(relayPin, LOW);
+    pausedTime = heatingTimer.getValue();
+    
   }
   
    // if elapsedTime has reached setTime, move to Complete (11)
@@ -476,6 +479,8 @@ void runMenuPauseState() {
     machineState = 11;
     Serial.println("Moving to " + machineState);
     lcd.clear();
+    // turn off heater, break
+    digitalWrite(relayPin, LOW);
   } 
 }
 
@@ -484,10 +489,31 @@ void runMenuPauseState() {
 // ************************************************
 void runMenuCancelState() {
 
+  // check the time
+  currentTime = millis();
+  Serial.println("Current Time: " + String(currentTime));
+  
+  elapsedHeatingTime = heatingTimer.getValue();
+  
+  Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
+
+  // otherwise update the temperature
+  if (tempCheckTimer.onRestart()) {
+    currentTemp = getTemp();
+    }
+  
+  // check temperature against set temperature and set relay
+  if (currentTemp < setTemp ) {
+    digitalWrite(relayPin, HIGH);
+  } else {
+    digitalWrite(relayPin, LOW);
+  }
+  
+  displayHeatingTime = elapsedHeatingTime / 60000;
+  Serial.println("Display Heating Time: " + String(displayHeatingTime));
+  
   // currentTemp = getTemp(); // only run this every 1 second or so
-  currentTemp = 34;
-  // work out current time
-  setupMenu(currentTemp, 23, setTimeMins, 9, 1);
+  setupMenu(currentTemp, displayHeatingTime, setTimeMins, 9, 1);
 
   // scroll forward, move to Run - Select Pause (7)
   if (encoderUp) {
@@ -580,8 +606,6 @@ void resetState() {
   Serial.println("Moving to " + machineState);
 
   lcd.clear();
-
-  startupTimeStart = millis();
 }
 
 
