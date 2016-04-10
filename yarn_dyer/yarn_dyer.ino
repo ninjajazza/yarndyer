@@ -92,7 +92,7 @@ void setup() {
 
   //set up timers
   startupTimer.setTimeout(3000); // period to display boot screen
-  blinkTimer.setHertz(4); // frequency of blinking timer
+  blinkTimer.setHertz(2); // frequency of blinking timer
   tempCheckTimer.setHertz(1); // frequency of temperature checks
   //heatingTimer;
   
@@ -209,7 +209,7 @@ void startupState() {
   lcd.print("Yarn Dyer " + version);
   // Print a message to the LCD.
   lcd.setCursor(0, 1);
-  lcd.print("Live Fast Dye Yarn");
+  lcd.print("livefast dyeyarn");
 
   // check timer, move to setup state if required
   if (startupTimer.isExpired()) {
@@ -423,46 +423,7 @@ void setupMenuChangeTimeState() {
 // Run - Select Cancel (State 8)
 // ************************************************
 void runMenuCancelState() {
-//    // display temp icon
-//  lcd.setCursor(0, 0);
-//  lcd.write(1);
-//
-//  //temp
-//  lcd.setCursor(1, 0);
-//  lcd.print(String(currentTemp, 0));
-//
-//  //spacing
-//  lcd.setCursor(3, 0);
-//  lcd.write(2); // degrees symbol
-//  lcd.setCursor(4, 0);
-//  lcd.print("C");
-//
-//  // display clock icon
-//  lcd.setCursor(7, 0);
-//  lcd.write(3); // clock symbol
-//
-//  // display current time
-//  lcd.setCursor(8, 0);
-//  lcd.print(currentTime);
-//  lcd.print("/");
-//
-//  // display set time
-//  lcd.setCursor(12, 0);
-//  lcd.print(setTimeMins);
-//  lcd.setCursor(15, 0);
-//  lcd.print("m");
-//
-//  // menu line
-//  lcd.setCursor(1, 1);
-//  lcd.print("Pause");
-//
-//  lcd.setCursor(10, 1);
-//  lcd.print("Cancel");
-//
-//  // insert cursor
-//  lcd.setCursor(cursorRow, cursorCol);
-//  lcd.print(">");
-
+  
   // check the time
   currentTime = millis();
   Serial.println("Current Time: " + String(currentTime));
@@ -485,33 +446,45 @@ void runMenuCancelState() {
   
   displayHeatingTime = elapsedHeatingTime / 60000;
   Serial.println("Display Heating Time: " + String(displayHeatingTime));
-  
-  // currentTemp = getTemp(); // only run this every 1 second or so
-  setupMenu(currentTemp, displayHeatingTime, setTimeMins, 9, 1);
 
-//  // scroll forward, move to Run - Select Pause (7)
-//  if (encoderUp) {
-//    machineState = 7;
-//    Serial.println("Moving to " + machineState);
-//    lcd.setCursor(9, 1);
-//    lcd.print(" ");
-//  }
-//
-//  // scroll back, move to Run - Select Pause (7)
-//  if (encoderDown) {
-//    machineState = 7;
-//    Serial.println("Moving to " + machineState);
-//    lcd.setCursor(9, 1);
-//    lcd.print(" ");
-//  }
+  // currentTemp = getTemp(); // only run this every 1 second or so
+  runMenu(currentTemp, displayHeatingTime, setTimeMins);
+
+  // cancel option
+  lcd.setCursor(10, 1);
+  lcd.print("Cancel");
+
+  // cursor
+  lcd.setCursor(9, 1);
+  if (blinkOn) {
+      lcd.print(">");
+    } else {
+      lcd.print(" ");
+    }
 
   // if user presses enter, move to Cancel (10)
   if (button.onPressed()) {
     machineState = 10;
     Serial.println("Moving to " + machineState);
     lcd.clear();
-    // turn off heater, store total time, break
+    
+    // stop timer
+    heatingTimer.stop();
+    
+    // turn off relay
+    digitalWrite(relayPin, LOW);
   }
+
+   // if elapsedTime has reached setTime, move to Complete (11)
+  if (heatingTimer.isExpired()) {
+    machineState = 11;
+    Serial.println("Moving to " + machineState);
+    lcd.clear();
+    
+    // turn off relay
+    digitalWrite(relayPin, LOW);
+  } 
+  
 }
 
 // ************************************************
@@ -523,49 +496,36 @@ void runMenuCancelState() {
 // Cancel (State 10)
 // ************************************************
 void cancelState() {
-//    // display temp icon
-//  lcd.setCursor(0, 0);
-//  lcd.write(1);
-//
-//  //temp
-//  lcd.setCursor(1, 0);
-//  lcd.print(String(currentTemp, 0));
-//
-//  //spacing
-//  lcd.setCursor(3, 0);
-//  lcd.write(2); // degrees symbol
-//  lcd.setCursor(4, 0);
-//  lcd.print("C");
-//
-//  // display clock icon
-//  lcd.setCursor(7, 0);
-//  lcd.write(3); // clock symbol
-//
-//  // display current time
-//  lcd.setCursor(8, 0);
-//  lcd.print(currentTime);
-//  lcd.print("/");
-//
-//  // display set time
-//  lcd.setCursor(12, 0);
-//  lcd.print(setTimeMins);
-//  lcd.setCursor(15, 0);
-//  lcd.print("m");
-//
-//  // menu line
-//  lcd.setCursor(1, 1);
-//  lcd.print("Pause");
-//
-//  lcd.setCursor(10, 1);
-//  lcd.print("Cancel");
-//
-//  // insert cursor
-//  lcd.setCursor(cursorRow, cursorCol);
-//  lcd.print(">");
-  // display time elapsed, current temp
-  // listen for user input to reset
-  lcd.setCursor(0, 0);
-  lcd.print("Cancel");
+ // check the time
+  currentTime = millis();
+  Serial.println("Current Time: " + String(currentTime));
+  
+  elapsedHeatingTime = heatingTimer.getValue();
+  
+  Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
+
+  // otherwise update the temperature
+  if (tempCheckTimer.onRestart()) {
+    currentTemp = getTemp();
+    }
+  
+  runMenu(currentTemp, displayHeatingTime, setTimeMins);
+
+  // cancelled
+  lcd.setCursor(0, 1);
+  lcd.print("Cancelled");
+
+  // reset option
+  lcd.setCursor(11, 1);
+  lcd.print("Reset");
+
+  // cursor
+  lcd.setCursor(10, 1);
+  if (blinkOn) {
+      lcd.print(">");
+    } else {
+      lcd.print(" ");
+    }
 
   // if user presses enter, move to Reset (12)
   if (button.onPressed()) {
@@ -579,51 +539,43 @@ void cancelState() {
 // Complete (State 11)
 // ************************************************
 void completeState() {
-
-//    // display temp icon
-//  lcd.setCursor(0, 0);
-//  lcd.write(1);
-//
-//  //temp
-//  lcd.setCursor(1, 0);
-//  lcd.print(String(currentTemp, 0));
-//
-//  //spacing
-//  lcd.setCursor(3, 0);
-//  lcd.write(2); // degrees symbol
-//  lcd.setCursor(4, 0);
-//  lcd.print("C");
-//
-//  // display clock icon
-//  lcd.setCursor(7, 0);
-//  lcd.write(3); // clock symbol
-//
-//  // display current time
-//  lcd.setCursor(8, 0);
-//  lcd.print(currentTime);
-//  lcd.print("/");
-//
-//  // display set time
-//  lcd.setCursor(12, 0);
-//  lcd.print(setTimeMins);
-//  lcd.setCursor(15, 0);
-//  lcd.print("m");
-//
-//  // menu line
-//  lcd.setCursor(1, 1);
-//  lcd.print("Pause");
-//
-//  lcd.setCursor(10, 1);
-//  lcd.print("Cancel");
-//
-//  // insert cursor
-//  lcd.setCursor(cursorRow, cursorCol);
-//  lcd.print(">");
+ // check the time
+  currentTime = millis();
+  Serial.println("Current Time: " + String(currentTime));
   
-  // display time elapsed, current temp
-  // listen for user input to reset
-  lcd.setCursor(0, 0);
+  elapsedHeatingTime = heatingTimer.getValue();
+  
+  Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
+
+  // otherwise update the temperature
+  if (tempCheckTimer.onRestart()) {
+    currentTemp = getTemp();
+    }
+  
+  // check temperature against set temperature and set relay
+  if (currentTemp < setTemp ) {
+    digitalWrite(relayPin, HIGH);
+  } else {
+    digitalWrite(relayPin, LOW);
+  }
+  
+  runMenu(currentTemp, displayHeatingTime, setTimeMins);
+
+  // complete
+  lcd.setCursor(0, 1);
   lcd.print("Complete");
+
+  // reset option
+  lcd.setCursor(11, 1);
+  lcd.print("Reset");
+
+  // cursor
+  lcd.setCursor(10, 1);
+  if (blinkOn) {
+      lcd.print(">");
+    } else {
+      lcd.print(" ");
+    }
 
   // if user presses enter, move to Reset (12)
   if (button.onPressed()) {
@@ -649,6 +601,8 @@ void resetState() {
   Serial.println("Moving to " + machineState);
 
   lcd.clear();
+
+  startupTimer.restart();
 }
 
 
@@ -713,6 +667,43 @@ void setupMenu(float displayTemp, int displayTime, int cursorRow, int cursorCol,
   }
 }
 
+// ************************************************
+// Display (Run)
+// the display screen for the runp menu
+// pass in variables to configure behaviour of this screen
+// only takes up the top row
+// ************************************************
+void runMenu(float displayTemp, int progressTime, int runningTime) {
+  // display temp icon
+  lcd.setCursor(0, 0);
+  lcd.write(1);
+
+  //temp
+  lcd.setCursor(1, 0);
+  lcd.print(String(displayTemp, 0));
+
+  //spacing
+  lcd.setCursor(3, 0);
+  lcd.write(2); // degrees symbol
+  lcd.setCursor(4, 0);
+  lcd.print("C");
+
+  // display clock icon
+  lcd.setCursor(7, 0);
+  lcd.write(3); // clock symbol
+
+  // display current time
+  lcd.setCursor(8, 0);
+  lcd.print(progressTime);
+  lcd.setCursor(11, 0);
+  lcd.print("/");
+
+  // display set time
+  lcd.setCursor(12, 0);
+  lcd.print(runningTime);
+  lcd.setCursor(15, 0);
+  lcd.print("m");
+}
 
 // ************************************************
 // MachineStateName
