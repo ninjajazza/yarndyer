@@ -10,12 +10,10 @@
     4: Setup - Reset
     5: Setup - Change Temp
     6: Setup - Change Time
-    7: Run - Select Pause
-    8: Run - Select Cancel
-    9: Pause
-    10: Cancel
-    11: Complete
-    12: Reset
+    7: Run
+    8: Cancel
+    9: Complete
+    10: Reset
 */
 
 #include <Encoder.h>
@@ -164,27 +162,19 @@ void loop() {
       setupMenuChangeTimeState();
       break;
 
-    case 7: // Run - Select Pause
-      //runMenuPauseState();
-      break;
-
-    case 8:  // Run - Select Cancel
+    case 7:  // Run
       runMenuCancelState();
       break;
 
-    case 9: // Pause
-      //pauseState();
-      break;
-
-    case 10: // Cancel
+    case 8: // Cancel
       cancelState();
       break;
 
-    case 11: // Complete
+    case 9: // Complete
       completeState();
       break;
 
-    case 12: // reset
+    case 10: // reset
       resetState();
       break;
 
@@ -310,7 +300,7 @@ void setupMenuRunState() {
     lcd.print(" ");
   }
 
-  // enter, move to Run - Select Cancel (8)
+  // enter, move to Run (8)
   if (button.onPressed()) {
     machineState = 8;
     Serial.println("Moving to " + String(machineState));
@@ -415,12 +405,7 @@ void setupMenuChangeTimeState() {
 }
 
 // ************************************************
-// Run - Select Pause (State 7)
-// ************************************************
-// removed
-
-// ************************************************
-// Run - Select Cancel (State 8)
+// Run (State 7)
 // ************************************************
 void runMenuCancelState() {
 
@@ -487,12 +472,7 @@ void runMenuCancelState() {
 }
 
 // ************************************************
-// Pause (State 9)
-// ************************************************
-// removed
-
-// ************************************************
-// Cancel (State 10)
+// Cancel (State 8)
 // ************************************************
 void cancelState() {
   // check the time
@@ -535,7 +515,7 @@ void cancelState() {
 }
 
 // ************************************************
-// Complete (State 11)
+// Complete (State 9)
 // ************************************************
 void completeState() {
   // check the time
@@ -578,7 +558,7 @@ void completeState() {
 }
 
 // ************************************************
-// Reset (State 12)
+// Reset (State 10)
 // ************************************************
 void resetState() {
 
@@ -762,27 +742,19 @@ String machineStateName(int stateNumber) {
       return "Setup - Change Time";
       break;
 
-    case 7: // Run - Select Pause
-      return "Run - Select Pause";
+    case 7:  // Run
+      return "Run";
       break;
 
-    case 8:  // Run - Select Cancel
-      return "Run - Select Cancel";
-      break;
-
-    case 9: // Pause
-      return "Pause";
-      break;
-
-    case 10: // Cancel
+    case 8: // Cancel
       return "Cancel";
       break;
 
-    case 11: // Complete
+    case 9: // Complete
       return "Complete";
       break;
 
-    case 12: // reset
+    case 10: // Reset
       return "Reset";
       break;
   }
