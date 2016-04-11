@@ -432,8 +432,9 @@ void runMenuCancelState() {
 
   Serial.println("Elapsed Heating Time: " + String(elapsedHeatingTime));
 
-  // otherwise update the temperature
+  // update the temperature
   if (tempCheckTimer.onRestart()) {
+    currentTemp = getTemp();
   }
 
   // check temperature against set temperature and set relay
@@ -446,7 +447,6 @@ void runMenuCancelState() {
   displayHeatingTime = elapsedHeatingTime / 60000;
   Serial.println("Display Heating Time: " + String(displayHeatingTime));
 
-  // currentTemp = getTemp(); // only run this every 1 second or so
   runMenu(currentTemp, displayHeatingTime, setTimeMins);
 
   // cancel option
@@ -479,7 +479,7 @@ void runMenuCancelState() {
     machineState = 11;
     Serial.println("Moving to " + machineState);
     lcd.clear();
-
+    displayHeatingTime = elapsedHeatingTime / 60000;
     // turn off relay
     digitalWrite(relayPin, LOW);
   }
@@ -599,13 +599,43 @@ void resetState() {
 
 // ************************************************
 // getTemp
-// this function abstracts the code required to fetch the temperature
+// abstracts the code required to fetch the temperature
 // ************************************************
 float getTemp(void) {
   sensors.requestTemperatures();
   float temp = sensors.getTempCByIndex(0);
   Serial.println(temp);
   return temp;
+}
+
+// ************************************************
+// formatIntValue
+// formats a long value into a fixed length, right justified string
+// ************************************************
+String formatIntValue(long inputValue, int outputLength) {
+  String outputValue = String(inputValue);
+  int stringLength = outputValue.length();
+  while (stringLength < outputLength) {
+    outputValue = " " + outputValue;
+    stringLength = outputValue.length();
+  }
+  return outputValue;
+  Serial.println(outputValue);
+}
+
+// ************************************************
+// formatFloatValue
+// formats a long value into a fixed length, right justified string
+// ************************************************
+String formatFloatValue(float inputValue, int outputLength) {
+  String outputValue = String(inputValue, 0);
+  int stringLength = outputValue.length();
+  while (stringLength < outputLength) {
+    outputValue = " " + outputValue;
+    stringLength = outputValue.length();
+  }
+  return outputValue;
+  Serial.println(outputValue);
 }
 
 // ************************************************
@@ -622,7 +652,7 @@ void setupMenu(float displayTemp, int displayTime, int cursorRow, int cursorCol,
   lcd.setCursor(5, 0);
   lcd.write(2); // degrees symbol
   lcd.setCursor(2, 0);
-  lcd.print(String(displayTemp, 0));
+  lcd.print(formatIntValue(displayTemp, 3));
   lcd.setCursor(6, 0);
   lcd.print("C");
 
@@ -631,7 +661,7 @@ void setupMenu(float displayTemp, int displayTime, int cursorRow, int cursorCol,
   lcd.write(3); // clock symbol
   // display time
   lcd.setCursor(12, 0);
-  lcd.print(displayTime);
+  lcd.print(formatIntValue(displayTime, 3));
   // display time formatting
   lcd.setCursor(15, 0);
   lcd.print("m");
@@ -667,6 +697,10 @@ void runMenu(float displayTemp, int progressTime, int runningTime) {
   lcd.setCursor(0, 0);
   lcd.write(1);
 
+  // temp
+  lcd.setCursor(1, 0);
+  lcd.print(formatFloatValue(displayTemp, 3));
+
   // temp formatting
   lcd.setCursor(4, 0);
   lcd.write(2); // degrees symbol
@@ -679,7 +713,7 @@ void runMenu(float displayTemp, int progressTime, int runningTime) {
 
   // display progress time
   lcd.setCursor(8, 0);
-  lcd.print(progressTime);
+  lcd.print(formatIntValue(progressTime,3));
   
   // display time formatting elements
   lcd.setCursor(11, 0);
@@ -687,16 +721,9 @@ void runMenu(float displayTemp, int progressTime, int runningTime) {
   
   // display set time
   lcd.setCursor(12, 0);
-  lcd.print(runningTime);
+  lcd.print(formatIntValue(runningTime,3));
   lcd.setCursor(15, 0);
   lcd.print("m");
-
-  // temp
-  lcd.setCursor(3, 0);
-  lcd.print(String(displayTemp, 0));
-
-
-
 
 
 }
