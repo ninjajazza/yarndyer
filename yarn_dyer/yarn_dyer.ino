@@ -1,5 +1,3 @@
-
-
 /*  Yarn Dyer 0.7
 
     States
@@ -693,15 +691,15 @@ void runMenu(float displayTemp, int progressTime, int runningTime) {
 
   // display progress time
   lcd.setCursor(8, 0);
-  lcd.print(formatIntValue(progressTime,3));
-  
+  lcd.print(formatIntValue(progressTime, 3));
+
   // display time formatting elements
   lcd.setCursor(11, 0);
   lcd.print("/");
-  
+
   // display set time
   lcd.setCursor(12, 0);
-  lcd.print(formatIntValue(runningTime,3));
+  lcd.print(formatIntValue(runningTime, 3));
   lcd.setCursor(15, 0);
   lcd.print("m");
 
