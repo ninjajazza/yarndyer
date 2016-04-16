@@ -1,4 +1,4 @@
-/*  Yarn Dyer 0.7
+/*  Yarn Dyer
 
     States
     0: Start
