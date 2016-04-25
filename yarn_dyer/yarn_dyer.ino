@@ -22,7 +22,7 @@
 #include <RBD_Timer.h>
 
 // set up onewire interface for temp sensor
-#define ONE_WIRE_BUS 0
+#define ONE_WIRE_BUS 5
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
@@ -40,7 +40,7 @@ float setTemp, currentTemp;
 boolean blinkOn, encoderUp, encoderDown, buttonState;
 
 // add some constants
-const int relayPin = 1;
+const int relayPin = 6;
 const int encoderPushPin = 4;
 const int debounceTime = 50;
 const int startupTime = 3000; // in millis
@@ -100,6 +100,7 @@ void setup() {
   setTemp = defaultSetTemp; // in C
 
   pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin,LOW);
   pinMode(encoderPushPin, INPUT);
   Serial.println("Start");
 
@@ -298,9 +299,9 @@ void setupMenuRunState() {
     lcd.print(" ");
   }
 
-  // enter, move to Run (8)
+  // enter, move to Run (7)
   if (button.onPressed()) {
-    machineState = 8;
+    machineState = 7;
     Serial.println("Moving to " + String(machineState));
     lcd.clear();
 
@@ -444,9 +445,9 @@ void runMenuCancelState() {
     lcd.print(" ");
   }
 
-  // if user presses enter, move to Cancel (10)
+  // if user presses enter, move to Cancel (8)
   if (button.onPressed()) {
-    machineState = 10;
+    machineState = 8;
     Serial.println("Moving to " + machineState);
     lcd.clear();
 
@@ -457,9 +458,9 @@ void runMenuCancelState() {
     digitalWrite(relayPin, LOW);
   }
 
-  // if elapsedTime has reached setTime, move to Complete (11)
+  // if elapsedTime has reached setTime, move to Complete (9)
   if (heatingTimer.isExpired()) {
-    machineState = 11;
+    machineState = 9;
     Serial.println("Moving to " + machineState);
     lcd.clear();
     displayHeatingTime = elapsedHeatingTime / 60000;
@@ -504,9 +505,9 @@ void cancelState() {
     lcd.print(" ");
   }
 
-  // if user presses enter, move to Reset (12)
+  // if user presses enter, move to Reset (10)
   if (button.onPressed()) {
-    machineState = 12;
+    machineState = 10;
     Serial.println("Moving to " + machineState);
     lcd.clear();
   }
@@ -547,9 +548,9 @@ void completeState() {
     lcd.print(" ");
   }
 
-  // if user presses enter, move to Reset (12)
+  // if user presses enter, move to Reset (10)
   if (button.onPressed()) {
-    machineState = 12;
+    machineState = 10;
     Serial.println("Moving to " + machineState);
     lcd.clear();
   }
